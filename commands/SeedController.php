@@ -2,7 +2,7 @@
 
 namespace app\commands;
 
-use app\models\User;
+use app\modules\api\v1\models\User;
 use Faker\Factory;
 use yii\console\Controller;
 
@@ -39,7 +39,7 @@ class SeedController extends Controller
             $user->password_hash = \Yii::$app->security->generatePasswordHash('test');
             $user->auth_token = $this->faker->sha1;
             $user->title = $this->faker->jobTitle;
-            $user->bio = $this->faker->text(10);
+            $user->bio = $this->faker->text(100);
             $user->avatar_url = $this->faker->imageUrl();
             $user->save();
         }

@@ -1,13 +1,6 @@
 <?php
 
 use yii\grid\GridView;
-use yii\bootstrap\Modal;
-use yii\helpers\Html;
-
-echo Modal::widget([
-    'id' => 'mymodal-lang',
-    'toggleButton' => false,
-]);
 
 ?>
 

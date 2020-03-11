@@ -1,6 +1,6 @@
 <?php
 
-namespace app\models;
+namespace app\modules\api\v1\models;
 
 use yii\mongodb\ActiveRecord;
 use yii\web\IdentityInterface;

@@ -2,7 +2,7 @@
 
 namespace app\modules\api\v1\resources;
 
-class User extends \app\models\User
+class User extends \app\modules\api\v1\models\User
 {
     /**
      * @return array
