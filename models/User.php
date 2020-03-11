@@ -2,38 +2,91 @@
 
 namespace app\models;
 
-class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
+use yii\mongodb\ActiveRecord;
+use yii\web\IdentityInterface;
+
+/**
+ * Class User
+ *
+ * @property string $_id;
+ * @property string $email;
+ * @property string $password_hash;
+ * @property string $auth_token
+ * @property string $title;
+ * @property string $bio;
+ * @property string $avatar_url;
+ *
+ * @package app\models
+ */
+class User extends ActiveRecord implements IdentityInterface
 {
-    public $id;
-    public $username;
+    /**
+     * @var
+     */
+    public $avatar;
+
+    /**
+     * @var string
+     */
     public $password;
-    public $authKey;
-    public $accessToken;
 
-    private static $users = [
-        '100' => [
-            'id' => '100',
-            'username' => 'admin',
-            'password' => 'admin',
-            'authKey' => 'test100key',
-            'accessToken' => '100-token',
-        ],
-        '101' => [
-            'id' => '101',
-            'username' => 'demo',
-            'password' => 'demo',
-            'authKey' => 'test101key',
-            'accessToken' => '101-token',
-        ],
-    ];
+    /**
+     * @var string
+     */
+    public $validate_password;
 
+    /**
+     * @return string
+     */
+    public static function collectionName()
+    {
+        return 'user';
+    }
+
+    /**
+     * @return array list of attribute names.
+     */
+    public function attributes()
+    {
+        return ['_id', 'email', 'password_hash', 'auth_token', 'title', 'bio', 'avatar_url'];
+    }
+
+    /**
+     * @return array
+     */
+    public function rules()
+    {
+        return [
+            [['email', 'password', 'validate_password'], 'required', 'on' => 'insert'],
+            ['password', 'compare', 'compareAttribute' => 'validate_password', 'on' => 'insert'],
+            ['email', 'email'],
+            ['email', 'unique'],
+            [['title', 'bio', 'password', 'validate_password'], 'string'],
+            ['bio', 'string', 'max' => 200]
+        ];
+    }
+
+    /**
+     * @param bool $insert
+     * @return bool
+     * @throws \yii\base\Exception
+     */
+    public function beforeSave($insert)
+    {
+        if (!empty($this->password) && !empty($this->validate_password)) {
+            $this->password_hash = \Yii::$app->security->generatePasswordHash($this->password);
+            $this->auth_token = \Yii::$app->security->generateRandomString();
+        }
+
+        return parent::beforeSave($insert);
+    }
 
     /**
      * {@inheritdoc}
      */
     public static function findIdentity($id)
     {
-        return isset(self::$users[$id]) ? new static(self::$users[$id]) : null;
+        return static::findOne($id);
     }
 
     /**
@@ -41,30 +94,16 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
-            if ($user['accessToken'] === $token) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::find()->where(['auth_token' => $token])->one();
     }
 
     /**
-     * Finds user by username
-     *
-     * @param string $username
-     * @return static|null
+     * @param $email
+     * @return User|null|ActiveRecord
      */
-    public static function findByUsername($username)
+    public static function findByEmail($email)
     {
-        foreach (self::$users as $user) {
-            if (strcasecmp($user['username'], $username) === 0) {
-                return new static($user);
-            }
-        }
-
-        return null;
+        return static::find()->where(['email' => $email])->one();
     }
 
     /**
@@ -72,7 +111,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function getId()
     {
-        return $this->id;
+        return $this->_id;
     }
 
     /**
@@ -80,7 +119,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function getAuthKey()
     {
-        return $this->authKey;
+        return $this->auth_token;
     }
 
     /**
@@ -88,7 +127,7 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function validateAuthKey($authKey)
     {
-        return $this->authKey === $authKey;
+        return $this->auth_token === $authKey;
     }
 
     /**
@@ -99,6 +138,6 @@ class User extends \yii\base\BaseObject implements \yii\web\IdentityInterface
      */
     public function validatePassword($password)
     {
-        return $this->password === $password;
+        return \Yii::$app->security->validatePassword($password, $this->password_hash);
     }
 }

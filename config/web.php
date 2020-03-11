@@ -2,6 +2,7 @@
 
 $params = require __DIR__ . '/params.php';
 $db = require __DIR__ . '/db.php';
+$routes = require __DIR__ . '/routes.php';
 
 $config = [
     'id' => 'basic',
@@ -13,8 +14,11 @@ $config = [
     ],
     'components' => [
         'request' => [
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser'
+            ],
             // !!! insert a secret key in the following (if it is empty) - this is required by cookie validation
-            'cookieValidationKey' => '',
+            'cookieValidationKey' => 'JeYWcS0gUDR6w48fsOtGe0A-IahZyJ0E',
         ],
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -42,16 +46,30 @@ $config = [
                 ],
             ],
         ],
+
         'db' => $db,
-        /*
+
+        'mongodb' => [
+            'class' => '\yii\mongodb\Connection',
+            'dsn' => 'mongodb://test:test@localhost:27017/test_project',
+        ],
+
         'urlManager' => [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
-            'rules' => [
-            ],
+            'rules' => $routes,
         ],
-        */
     ],
+
+    'modules' => [
+        'v1' => [
+            'class' => 'app\modules\api\v1\Module'
+        ],
+        'admin' => [
+            'class' => 'app\modules\admin\Module',
+        ]
+    ],
+
     'params' => $params,
 ];
 

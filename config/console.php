@@ -13,6 +13,9 @@ $config = [
         '@npm'   => '@vendor/npm-asset',
         '@tests' => '@app/tests',
     ],
+    'controllerMap' => [
+        'mongodb-migrate' => 'yii\mongodb\console\controllers\MigrateController'
+    ],
     'components' => [
         'cache' => [
             'class' => 'yii\caching\FileCache',
@@ -26,6 +29,11 @@ $config = [
             ],
         ],
         'db' => $db,
+
+        'mongodb' => [
+            'class' => '\yii\mongodb\Connection',
+            'dsn' => 'mongodb://test:test@localhost:27017/test_project',
+        ],
     ],
     'params' => $params,
     /*

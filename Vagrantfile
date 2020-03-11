@@ -72,9 +72,11 @@ Vagrant.configure(2) do |config|
   # config.vbguest.auto_update = false
 
   # provisioners
-  config.vm.provision 'shell', path: './vagrant/provision/once-as-root.sh', args: [options['timezone']]
+  config.vm.provision 'shell', path: './vagrant/provision/base_once.sh', args: [options['timezone']]
+  config.vm.provision 'shell', path: './vagrant/provision/mongodb.sh'
   config.vm.provision 'shell', path: './vagrant/provision/once-as-vagrant.sh', args: [options['github_token']], privileged: false
   config.vm.provision 'shell', path: './vagrant/provision/always-as-root.sh', run: 'always'
+
 
   # post-install message (vagrant console)
   config.vm.post_up_message = "App URL: http://#{domains[:app]}"
